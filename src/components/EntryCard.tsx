@@ -23,9 +23,10 @@ export default function EntryCard({ entry }: EntryCardProps) {
         <div className="flex items-start justify-between gap-4">
           <h2 className="text-2xl font-serif text-dark-brown mb-3 flex-1">{entry.title}</h2>
           <Link href={`/entries/${entry.id}/edit`}>
-            <button className="btn-secondary text-sm" style={{ minWidth: '90px' }}>
+            {/* <button className="btn-secondary text-sm" style={{ minWidth: '90px' }}>
               Edit
-            </button>
+            </button> */}
+            <span className="underline hover:text-warm-gray">Edit</span>
           </Link>
         </div>
       </div>
