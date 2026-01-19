@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -36,6 +37,34 @@ export default function DashboardPage() {
 
     loadData()
   }, [router])
+
+  async function handleDelete(entryId: string) {
+    const confirmed = window.confirm('Are you sure you want to delete this entry?')
+
+    if (!confirmed) {
+      return
+    }
+
+    setDeletingId(entryId)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/entries?id=${encodeURIComponent(entryId)}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        throw new Error(payload?.error || 'Failed to delete entry')
+      }
+
+      setEntries((prev) => prev.filter((entry) => entry.id !== entryId))
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete entry')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   if (loading) {
     return (
@@ -88,7 +117,12 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-8">
             {entries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} />
+              <EntryCard
+                key={entry.id}
+                entry={entry}
+                onDelete={() => handleDelete(entry.id)}
+                isDeleting={deletingId === entry.id}
+              />
             ))}
           </div>
         )}
