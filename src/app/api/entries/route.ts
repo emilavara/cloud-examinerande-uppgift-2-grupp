@@ -75,3 +75,43 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ entry: data });
 }
+
+export async function DELETE(request: Request) {
+  const accessToken = (await cookies()).get('sb-access-token')?.value
+
+  if (!accessToken) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { searchParams } = new URL(request.url)
+  const entryId = searchParams.get('id')
+
+  if (!entryId) {
+    return NextResponse.json({ error: 'Entry id is required' }, { status: 400 })
+  }
+
+  const supabase = createServerSupabase(accessToken)
+  const { data: userData, error: userError } = await supabase.auth.getUser(accessToken)
+
+  if (userError || !userData.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data, error } = await supabase
+    .from('entries')
+    .delete()
+    .eq('id', entryId)
+    .eq('user_id', userData.user.id)
+    .select()
+    .single()
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (!data) {
+    return NextResponse.json({ error: 'Entry not found' }, { status: 404 })
+  }
+
+  return NextResponse.json({ entry: data })
+}
