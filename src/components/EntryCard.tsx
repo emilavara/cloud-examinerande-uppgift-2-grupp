@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Entry } from '@/types/database.types'
 
 interface EntryCardProps {
@@ -33,7 +34,12 @@ export default function EntryCard({ entry, onDelete, isDeleting = false }: Entry
             </button>
           ) : null}
         </div>
-        <h2 className="text-2xl font-serif text-dark-brown mb-3">{entry.title}</h2>
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-2xl font-serif text-dark-brown mb-3 flex-1">{entry.title}</h2>
+          <Link href={`/entries/${entry.id}/edit`}>
+            <span className="underline hover:text-warm-gray">Edit</span>
+          </Link>
+        </div>
       </div>
       <p className="text-dark-brown/80 leading-relaxed whitespace-pre-wrap" style={{ width: '550px' }}>
         {entry.content}
