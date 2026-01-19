@@ -13,18 +13,37 @@ export async function POST(request: Request) {
   const supabase = createServerSupabase()
   const { data, error } = await supabase.auth.signUp({ email, password })
 
-  if (error || !data.session) {
-    return NextResponse.json({ error: error?.message || 'Signup failed' }, { status: 400 })
+  if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  const response = NextResponse.json({ user: data.user })
-  const cookieOptions = {
-    httpOnly: true,
-    sameSite: 'lax' as const,
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: data.session.expires_in,
+  if (!data.user) {
+      return NextResponse.json({ error: 'Signup failed' }, { status: 400 })
   }
+
+  // No session yet -> tell client to check email
+  if (!data.session) {
+      return NextResponse.json(
+          { user: data.user, needsEmailConfirmation: true },
+          { status: 200 }
+      )
+  }
+
+  // Session exists -> set cookies
+  const response = NextResponse.json(
+      { user: data.user, needsEmailConfirmation: false },
+      { status: 200 }
+  )
+
+  const cookieOptions = {
+      httpOnly: true,
+      sameSite: 'lax' as const,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      // Supabase gives expires_in in seconds; Next cookies expect seconds for maxAge
+      maxAge: data.session.expires_in,
+  }
+
 
   response.cookies.set('sb-access-token', data.session.access_token, cookieOptions)
   response.cookies.set('sb-refresh-token', data.session.refresh_token, cookieOptions)
