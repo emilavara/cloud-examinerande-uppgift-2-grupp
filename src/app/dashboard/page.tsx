@@ -63,7 +63,7 @@ export default function DashboardPage() {
     <div className="min-h-screen">
       <Header />
 
-      <main className="max-w-4xl mx-auto py-12" style={{ paddingLeft: '80px', paddingRight: '80px' }}>
+      <main className="max-w-4xl mx-auto py-12 px-8 sm:px-6">
         <div className="flex items-center justify-between mb-12">
           <div>
             <h2 className="text-3xl font-serif text-dark-brown mb-2">Your Entries</h2>
