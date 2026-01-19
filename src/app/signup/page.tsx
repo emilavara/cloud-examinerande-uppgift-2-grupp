@@ -11,11 +11,13 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setSuccess(null)
 
     if (password !== confirmPassword) {
       setError('Passwords do not match')
@@ -31,7 +33,8 @@ export default function SignupPage() {
 
     try {
       await signUp({ email, password })
-      router.push('/dashboard')
+      // router.push('/dashboard')
+      setSuccess('A confirmation email has been sent to your inbox!')
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup')
     } finally {
@@ -97,6 +100,12 @@ export default function SignupPage() {
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-sm text-sm">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-sm text-sm">
+                {success}
               </div>
             )}
 
