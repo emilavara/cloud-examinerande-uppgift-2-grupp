@@ -17,50 +17,43 @@
 #--build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=<eran-anon-key> \
 #-t dagboks-appen .
 
-# Build stage
-FROM node:20-alpine AS builder
-
+# ---- deps ----
+FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Kopiera package files
-COPY package*.json ./
+# Kopiera package + lockfil först (max cache)
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Installera dependencies
-RUN npm install
+# ---- builder ----
+FROM node:20-alpine AS builder
+WORKDIR /app
 
-# Kopiera all kod
+# Återanvänd node_modules från deps-stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Deklarera build arguments för Supabase
+# Build arguments (endast för build-time)
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-# Sätt dem som miljövariabler för build-processen
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-# Bygg applikationen
 RUN npm run build
 
-# Production stage
+# ---- runner ----
 FROM node:20-alpine AS runner
-
 WORKDIR /app
-
 ENV NODE_ENV=production
 
-# Kopiera package files och installera endast production dependencies
-COPY package*.json ./
-RUN npm ci --only=production
-
-# Kopiera byggda filer från builder stage
-COPY --from=builder /app/.next ./.next
+# Standalone output innehåller servern + min deps
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Exponera port
 EXPOSE 3000
 
-# Starta applikationen
-CMD ["npm", "start"]
+# Standalone-servern kör med node server.js
+CMD ["node", "server.js"]
 
 

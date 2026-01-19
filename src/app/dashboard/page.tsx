@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     async function loadData() {
@@ -88,6 +89,16 @@ export default function DashboardPage() {
     )
   }
 
+  const normalizedQuery = searchQuery.trim().toLowerCase()
+  const filteredEntries = entries.filter((entry) => {
+    if (!normalizedQuery) {
+      return true
+    }
+    const titleMatch = entry.title.toLowerCase().includes(normalizedQuery)
+    const textMatch = entry.content.toLowerCase().includes(normalizedQuery)
+    return titleMatch || textMatch
+  })
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -115,16 +126,36 @@ export default function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-8">
-            {entries.map((entry) => (
-              <EntryCard
-                key={entry.id}
-                entry={entry}
-                onDelete={() => handleDelete(entry.id)}
-                isDeleting={deletingId === entry.id}
+          <>
+            <form className="mb-8" onSubmit={(event) => event.preventDefault()}>
+              <label htmlFor="search-query" className="block text-sm text-warm-gray mb-2">
+                Search in title or text
+              </label>
+              <input
+                id="search-query"
+                type="text"
+                className="w-full rounded-md border border-warm-gray/40 px-3 py-2 bg-white"
+                placeholder="Type a keyword"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
               />
-            ))}
-          </div>
+            </form>
+
+            {filteredEntries.length === 0 ? (
+              <p className="text-warm-gray text-center">No entries match your search.</p>
+            ) : (
+              <div className="space-y-8">
+                {filteredEntries.map((entry) => (
+                  <EntryCard
+                    key={entry.id}
+                    entry={entry}
+                    onDelete={() => handleDelete(entry.id)}
+                    isDeleting={deletingId === entry.id}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
