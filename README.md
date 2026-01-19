@@ -1,4 +1,8 @@
-# Journal App - Student Assignment Starter test
+## Deployad länk: https://cloud-uppgift-kajmil.netlify.app/
+
+    
+
+## Journal App - Student Assignment Starter test
 
 A minimalist journaling application built with Next.js 14, TypeScript, Tailwind CSS, and Supabase. This project serves as a starting point for students to practice debugging, adding features, and improving existing code.
 
