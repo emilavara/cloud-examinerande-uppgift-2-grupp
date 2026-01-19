@@ -5,7 +5,8 @@ interface EntryCardProps {
 }
 
 export default function EntryCard({ entry }: EntryCardProps) {
-  const formattedDate = new Date(entry.created_at).toLocaleDateString("en-US", {
+  const formattedDate = new Date(entry.created_at).toLocaleDateString("en-SE", {
+		weekday: "long",
 		year: "numeric",
 		month: "long",
 		day: "numeric",
@@ -16,7 +17,7 @@ export default function EntryCard({ entry }: EntryCardProps) {
   return (
     <div className="card" style={{ minWidth: '600px' }}>
       <div className="mb-4">
-        <div className="text-xs text-warm-gray mb-2 tracking-wide uppercase">
+        <div className="text-xs text-warm-gray mb-2 tracking-wide">
           {formattedDate}
         </div>
         <h2 className="text-2xl font-serif text-dark-brown mb-3">{entry.title}</h2>
