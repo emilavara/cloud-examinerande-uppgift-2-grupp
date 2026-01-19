@@ -1,17 +1,19 @@
-import { supabase } from './client'
 import { LoginCredentials, SignupCredentials } from '@/types/auth.types'
 
 /**
  * Sign up a new user with email and password
  */
 export async function signUp({ email, password }: SignupCredentials) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
+  const response = await fetch('/api/auth/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
   })
 
-  if (error) {
-    throw error
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Signup failed')
   }
 
   return data
@@ -21,13 +23,16 @@ export async function signUp({ email, password }: SignupCredentials) {
  * Sign in an existing user with email and password
  */
 export async function signIn({ email, password }: LoginCredentials) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
   })
 
-  if (error) {
-    throw error
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Login failed')
   }
 
   return data
@@ -37,10 +42,13 @@ export async function signIn({ email, password }: LoginCredentials) {
  * Sign out the current user
  */
 export async function signOut() {
-  const { error } = await supabase.auth.signOut()
+  const response = await fetch('/api/auth/logout', {
+    method: 'POST',
+  })
 
-  if (error) {
-    throw error
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+    throw new Error(data.error || 'Sign out failed')
   }
 }
 
@@ -48,6 +56,12 @@ export async function signOut() {
  * Get the current authenticated user
  */
 export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser()
-  return user
+  const response = await fetch('/api/auth/me')
+  const data = await response.json()
+
+  if (!response.ok) {
+    return null
+  }
+
+  return data.user ?? null
 }
