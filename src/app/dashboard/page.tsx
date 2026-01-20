@@ -9,6 +9,14 @@ import { getCurrentUser } from '@/lib/supabase/auth'
 import { Entry } from '@/types/database.types'
 import Link from 'next/link'
 
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return fallback
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [entries, setEntries] = useState<Entry[]>([])
@@ -29,8 +37,8 @@ export default function DashboardPage() {
 
         const data = await getEntries()
         setEntries(data)
-      } catch (err: any) {
-        setError(err.message || 'Failed to load entries')
+      } catch (err: unknown) {
+        setError(getErrorMessage(err, 'Failed to load entries'))
       } finally {
         setLoading(false)
       }
@@ -60,8 +68,8 @@ export default function DashboardPage() {
       }
 
       setEntries((prev) => prev.filter((entry) => entry.id !== entryId))
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete entry')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to delete entry'))
     } finally {
       setDeletingId(null)
     }
@@ -120,7 +128,7 @@ export default function DashboardPage() {
 
         {entries.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-warm-gray mb-6">You haven't written any entries yet.</p>
+            <p className="text-warm-gray mb-6">You haven&apos;t written any entries yet.</p>
             <Link href="/new-entry">
               <button className="btn-secondary">Write your first entry</button>
             </Link>

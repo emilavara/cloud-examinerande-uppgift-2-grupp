@@ -34,9 +34,13 @@ export default function EditEntryPage({ params }: PageProps) {
 				if (!isMounted) return;
 				setTitle(entry.title);
 				setContent(entry.content);
-			} catch (err: any) {
+			} catch (err: unknown) {
 				if (!isMounted) return;
-				setError(err.message || "Failed to load entry");
+				const message =
+					err instanceof Error && err.message
+						? err.message
+						: "Failed to load entry";
+				setError(message);
 			} finally {
 				if (isMounted) {
 					setInitialLoading(false);
@@ -65,8 +69,12 @@ export default function EditEntryPage({ params }: PageProps) {
 		try {
 			await updateEntry(id, { title, content });
 			router.push("/dashboard");
-		} catch (err: any) {
-			setError(err.message || "Failed to update entry");
+		} catch (err: unknown) {
+			const message =
+				err instanceof Error && err.message
+					? err.message
+					: "Failed to update entry";
+			setError(message);
 			setLoading(false);
 		}
 	};
