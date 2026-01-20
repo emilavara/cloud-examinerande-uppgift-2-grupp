@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signUp } from '@/lib/supabase/auth'
 
 export default function SignupPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -35,8 +33,10 @@ export default function SignupPage() {
       await signUp({ email, password })
       // router.push('/dashboard')
       setSuccess('A confirmation email has been sent to your inbox!')
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during signup')
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error && err.message ? err.message : 'An error occurred during signup'
+      setError(message)
     } finally {
       setLoading(false)
     }
